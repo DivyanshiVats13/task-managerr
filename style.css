@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
 :root {
     --bg-main: #F7F5F2;
     --card-bg: #ffffff;
@@ -15,151 +17,199 @@
     --danger-color: #D64545;
 }
 
-/* Body */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
+    font-family: 'Outfit', sans-serif;
     background-color: var(--bg-main);
     color: var(--text-primary);
-    animation: none; /* removed neon animation */
+
+    /* CENTER EVERYTHING */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    min-height: 100vh;
 }
 
 /* Container */
 .container {
+    width: 100%;
+    max-width: 560px;
+
     background: var(--card-bg);
     border: 1px solid var(--card-border);
+    border-radius: 20px;
+
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+    position: relative;
 }
 
-/* Remove neon top border */
+/* Top Accent Bar */
 .container::before {
-    background: linear-gradient(90deg, var(--soft-orange), var(--primary-orange));
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     height: 4px;
+    border-radius: 20px 20px 0 0;
+    background: linear-gradient(90deg, var(--soft-orange), var(--primary-orange));
 }
 
 /* Header */
+header {
+    text-align: center;
+}
+
 header h1 {
-    background: none;
-    -webkit-text-fill-color: initial;
+    font-size: 2rem;
     color: var(--primary-orange);
-    letter-spacing: -0.5px;
+    margin-bottom: 6px;
 }
 
 header p {
     color: var(--text-secondary);
+    font-size: 0.95rem;
 }
 
 /* Input */
+.task-form {
+    display: flex;
+    gap: 10px;
+}
+
 .task-form input {
-    background: #fff;
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 10px;
     border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    box-shadow: none;
+    font-size: 14px;
+    outline: none;
 }
 
 .task-form input:focus {
     border-color: var(--primary-orange);
     box-shadow: 0 0 0 3px rgba(231, 111, 46, 0.15);
-    transform: none;
 }
 
-/* Button */
+/* Add Button */
 .btn-primary {
     background: var(--primary-orange);
-    box-shadow: 0 6px 14px rgba(231, 111, 46, 0.25);
-}
-
-.btn-primary::before {
-    display: none;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s;
 }
 
 .btn-primary:hover {
     background: #cf5c20;
-    transform: translateY(-1px);
 }
 
-/* Text button */
-.btn-text:hover {
-    color: var(--danger-color);
-    background: #fdecea;
-    text-shadow: none;
-}
-
-/* Task count */
+/* Task Count Row */
 .task-count {
+    text-align: center;
+    font-size: 14px;
     color: var(--primary-orange);
     background: var(--light-orange);
-    border: 1px solid #f3c7b2;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+/* Task List */
+.task-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 /* Task Item */
 .task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
     background: #fff;
     border: 1px solid var(--card-border);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    border-radius: 12px;
+
+    padding: 12px;
+    transition: 0.2s;
 }
 
 .task-item:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.06);
-    border-color: #e8d8c9;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.06);
 }
 
 /* Checkbox */
-.task-checkbox {
-    border: 2px solid #d6cec4;
-    background: #fff;
+.check-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid #ccc;
+    background: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.task-checkbox:hover {
-    border-color: var(--primary-orange);
-    box-shadow: none;
-}
-
-.task-checkbox:checked {
+.task-item.done .check-btn {
     background: var(--primary-orange);
-    box-shadow: none;
-    transform: scale(1.05);
+    border-color: var(--primary-orange);
 }
 
-/* Completed task */
-.task-item.completed {
-    background: #fafafa;
+/* Text */
+.task-text {
+    flex: 1;
+    font-size: 14px;
 }
 
-.task-item.completed .task-text {
-    color: #b0b0b0;
+/* Completed */
+.task-item.done .task-text {
+    text-decoration: line-through;
+    color: #aaa;
 }
 
-/* Delete button */
-.btn-icon {
-    border: 1px solid #e5dfd7;
-    color: #999;
+/* Delete Button */
+.delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #aaa;
 }
 
-.btn-icon:hover {
-    background: #fdecea;
+.delete-btn:hover {
     color: var(--danger-color);
-    transform: scale(1.1);
 }
 
-/* Empty state */
-.empty-state i {
-    background: linear-gradient(135deg, var(--soft-orange), var(--primary-orange));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: none;
-}
-
-.empty-state p {
+/* Empty State */
+.empty-state {
+    text-align: center;
     color: var(--text-secondary);
+    padding: 2rem 0;
 }
 
-/* Animations toned down */
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+/* Congrats */
+.congrats-bar {
+    text-align: center;
+    background: #EAF3DE;
+    border: 1px solid #C0DD97;
+    padding: 10px;
+    border-radius: 8px;
+    color: #3B6D11;
 }

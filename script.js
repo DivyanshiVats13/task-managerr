@@ -1,160 +1,160 @@
 // DOM Elements
+const taskForm = document.getElementById('task-form');
 const taskInput = document.getElementById('task-input');
 const taskList = document.getElementById('task-list');
 const taskCount = document.getElementById('task-count');
-const clearBtn = document.getElementById('clear-btn');
+const clearAllBtn = document.getElementById('clear-all');
 const emptyState = document.getElementById('empty-state');
-const congratsBar = document.getElementById('congrats-bar');
 
-// State
+// State Application
 let tasks = [];
 
-// Init
+// Initialize app
 function init() {
-    setGreeting();
-
-    const stored = localStorage.getItem('tasks');
-    if (stored) tasks = JSON.parse(stored);
-
+    updateGreeting();
+    const storedTasks = localStorage.getItem('tasks');
+    if (storedTasks) {
+        tasks = JSON.parse(storedTasks);
+    }
     renderTasks();
 }
 
-// Save
-function save() {
+// Add Dynamic Greeting
+function updateGreeting() {
+    const greetingEl = document.getElementById('greeting');
+    if (!greetingEl) return;
+    
+    const hour = new Date().getHours();
+    let greetingText = 'Good Evening! 🌙';
+    
+    if (hour < 12) {
+        greetingText = 'Good Morning! ☀️';
+    } else if (hour < 18) {
+        greetingText = 'Good Afternoon! ☕';
+    }
+    
+    greetingEl.innerText = greetingText;
+}
+
+// Update Local Storage
+function updateLocalStorage() {
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
-// Escape HTML
-function escHtml(s) {
-    return s.replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-}
-
-// Render (MENU STYLE UI)
+// Render Tasks
 function renderTasks() {
+    // Clear list
     taskList.innerHTML = '';
-
+    
+    // Check for empty state
     if (tasks.length === 0) {
-        emptyState.style.display = 'block';
-        congratsBar.style.display = 'none';
-        taskCount.textContent = 'No tasks yet — start small 🌱';
-        return;
-    }
-
-    emptyState.style.display = 'none';
-
-    const done = tasks.filter(t => t.done).length;
-    const total = tasks.length;
-
-    // Count text
-    if (done === total) {
-        taskCount.textContent = `All ${total} done! 🌟`;
-        congratsBar.style.display = 'block';
+        emptyState.style.display = 'flex';
+        taskList.style.display = 'none';
+        clearAllBtn.style.display = 'none';
     } else {
-        taskCount.textContent = `${done} of ${total} done`;
-        congratsBar.style.display = 'none';
+        emptyState.style.display = 'none';
+        taskList.style.display = 'flex';
+        clearAllBtn.style.display = 'block';
     }
-
-    // Create menu-style list
-    tasks.forEach((task, i) => {
+    
+    // Render each task
+    tasks.forEach(task => {
         const li = document.createElement('li');
-        li.className = 'task-item' + (task.done ? ' done' : '');
-
+        li.className = `task-item ${task.completed ? 'completed' : ''}`;
+        li.setAttribute('data-id', task.id);
+        
         li.innerHTML = `
-            <button class="check-btn" data-i="${i}">
-                <svg class="check-icon" viewBox="0 0 12 12">
-                    <path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-                </svg>
-            </button>
-
-            <span class="task-text">${escHtml(task.text)}</span>
-
-            <button class="delete-btn" data-i="${i}">
-                <svg width="13" height="13" viewBox="0 0 13 13">
-                    <path d="M1 1l11 11M12 1L1 12" stroke="currentColor" stroke-width="1.6"/>
-                </svg>
-            </button>
+            <div class="task-content">
+                <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})">
+                <span class="task-text">${escapeHTML(task.text)}</span>
+            </div>
+            <div class="task-actions">
+                <button class="btn-icon delete-btn" onclick="deleteTask(${task.id})" title="Delete Task">
+                    <i class="ph ph-trash"></i>
+                </button>
+            </div>
         `;
-
+        
         taskList.appendChild(li);
     });
-
-    // Toggle
-    document.querySelectorAll('.check-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const i = +btn.dataset.i;
-            tasks[i].done = !tasks[i].done;
-            save();
-            renderTasks();
-        });
-    });
-
-    // Delete
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const i = +btn.dataset.i;
-            tasks.splice(i, 1);
-            save();
-            renderTasks();
-        });
-    });
+    
+    // Update count
+    updateCount();
 }
 
 // Add Task
-function addTask() {
-    const text = taskInput.value.trim();
-    if (!text) return;
-
-    tasks.unshift({ text, done: false });
-    taskInput.value = '';
-
-    save();
+function addTask(e) {
+    e.preventDefault();
+    
+    const taskText = taskInput.value.trim();
+    if (!taskText) return;
+    
+    const newTask = {
+        id: Date.now(),
+        text: taskText,
+        completed: false
+    };
+    
+    tasks.push(newTask);
+    updateLocalStorage();
     renderTasks();
+    
+    taskInput.value = '';
+    taskInput.focus();
 }
 
-// Clear All
-clearBtn.addEventListener('click', () => {
-    if (tasks.length === 0) return;
-
-    if (confirm('Clear everything?')) {
-        tasks = [];
-        save();
-        renderTasks();
-    }
-});
-
-// Events
-document.getElementById('add-btn').addEventListener('click', addTask);
-taskInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') addTask();
-});
-
-// Greeting system (human feel)
-const greetings = {
-    morning: ["Good morning, <em>let's do this.</em>", "Rise and shine ✨"],
-    afternoon: ["Good afternoon!", "Keep going 💪"],
-    evening: ["Good evening 🌙", "Wrap it up strong."],
-    night: ["Late night grind? 🕯️", "Still going? respect."]
+// Toggle Task Completion
+window.toggleTask = function(id) {
+    tasks = tasks.map(task => {
+        if (task.id === id) {
+            return { ...task, completed: !task.completed };
+        }
+        return task;
+    });
+    updateLocalStorage();
+    renderTasks();
 };
 
-const subtexts = [
-    "One task at a time.",
-    "Small steps matter.",
-    "Focus > busy.",
-    "Make today count."
-];
+// Delete Task
+window.deleteTask = function(id) {
+    tasks = tasks.filter(task => task.id !== id);
+    updateLocalStorage();
+    renderTasks();
+};
 
-function setGreeting() {
-    const h = new Date().getHours();
-    const key = h < 12 ? 'morning' : h < 17 ? 'afternoon' : h < 21 ? 'evening' : 'night';
-
-    document.getElementById('greeting').innerHTML =
-        greetings[key][Math.floor(Math.random() * greetings[key].length)];
-
-    document.getElementById('subtext').textContent =
-        subtexts[Math.floor(Math.random() * subtexts.length)];
+// Clear All Tasks
+function clearAllTasks() {
+    if (confirm('Ready for a clean slate? This will remove all your tasks.')) {
+        tasks = [];
+        updateLocalStorage();
+        renderTasks();
+    }
 }
 
-// Start
+// Update Task Count
+function updateCount() {
+    const total = tasks.length;
+    const completed = tasks.filter(t => t.completed).length;
+    
+    if (total === 0) {
+        taskCount.innerHTML = '✨ Fresh start!';
+    } else if (completed === total) {
+        taskCount.innerHTML = '🎉 All done! Amazing job!';
+    } else {
+        taskCount.innerHTML = `🚀 <b>${completed}</b> of <b>${total}</b> completed`;
+    }
+}
+
+// Security: escape HTML to prevent XSS
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+}
+
+// Event Listeners
+taskForm.addEventListener('submit', addTask);
+clearAllBtn.addEventListener('click', clearAllTasks);
+
+// Start the app
 init();
